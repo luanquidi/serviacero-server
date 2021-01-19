@@ -226,6 +226,6 @@ app.use((req, res, next) => {
 // =================================================== CORS ==========================================================
 
 
-app.listen(3000, function() {
-    console.log('Aplicación corriendo...');
+app.listen(port, function() {
+    console.log('Aplicación corriendo...', port);
 });
