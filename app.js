@@ -11,6 +11,7 @@ const uuid = require('uuid/v4');
 // Rutas
 const authRoutes = require("./routes/auth");
 const projectRoutes = require("./routes/project");
+const contactsRoutes = require("./routes/contacts");
 
 const {
     USER_DB,
@@ -76,6 +77,7 @@ cloudinary.config({
 // =================================================== RUTAS ==========================================================
 app.use(`/api/login`, authRoutes);
 app.use(`/api/project`, projectRoutes);
+app.use(`/api/contacts`, contactsRoutes);
 // =================================================== RUTAS ==========================================================
 
 
