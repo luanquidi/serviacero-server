@@ -65,7 +65,97 @@ async function addProject(req, res) {
     });
 };
 
+async function editProject(req, res) {
+    if (req.file) {
+        const imgCloudinary = await cloudinary.v2.uploader.upload(req.file.path, {
+                eager: [
+                    { width: 400, height: 300, crop: "pad" },
+                    { width: 260, height: 200, crop: "crop", gravity: "north" }
+                ]
+            },
+            function(error, result) {});
+        req.body.imgUrl = imgCloudinary.eager[0].url;
+    }
+
+
+    Project.findByIdAndUpdate({ _id: req.body.id }, req.body, (err, projectUpdated) => {
+        if (err) {
+            return res.status(500).send({
+                ok: false,
+                message: "Error del servidor al editar proyecto.",
+            });
+        }
+
+        if (!projectUpdated) {
+            return res.status(400).send({
+                ok: false,
+                message: "No se ha podido editar el proyecto.",
+            });
+        }
+
+        return res.status(200).send({
+            ok: true,
+            message: "Se ha editado el proyecto correctamente.",
+            project: projectUpdated,
+        });
+    });
+}
+
+async function deleteProject(req, res) {
+    const id = req.body.idProject;
+    Project.findByIdAndRemove({ _id: id }, (err, projectDeleted) => {
+        if (err) {
+            return res.status(500).send({
+                ok: false,
+                message: "Error del servidor al eliminar proyecto.",
+            });
+        }
+
+        if (!projectDeleted) {
+            return res.status(400).send({
+                ok: false,
+                message: "No se ha podido eliminar el proyecto.",
+            });
+        }
+
+        return res.status(200).send({
+            ok: true,
+            message: "Se ha eliminado el proyecto correctamente.",
+            post: projectDeleted,
+        });
+    });
+}
+
+async function getProject(req, res) {
+    const id = req.query.id;
+
+    Project.findOne({ _id: id }, (err, projectoFounded) => {
+        if (err) {
+            return res.status(500).send({
+                ok: false,
+                message: "Error del servidor al listar proyecto.",
+            });
+        }
+
+        if (!projectoFounded) {
+            return res.status(400).send({
+                ok: false,
+                message: "No se ha podido listar el proyecto.",
+            });
+        }
+
+        return res.status(200).send({
+            ok: true,
+            message: "Se ha listado el proyecto correctamente.",
+            project: projectoFounded,
+        });
+    });
+}
+
 module.exports = {
     getProjects,
-    addProject
+    addProject,
+    editProject,
+    deleteProject,
+    getProject
 };
