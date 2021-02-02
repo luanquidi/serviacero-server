@@ -6,7 +6,7 @@ const Schema = mongoose.Schema;
 const PorjectSchema = Schema({
     name: String,
     description: String,
-    imgUrl: String,
+    imgUrl: [String],
     createdAt: Date
 });
 

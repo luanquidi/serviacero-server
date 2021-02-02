@@ -64,8 +64,9 @@ const storage = multer.diskStorage({
     filename: (req, file, cb, filename) => {
         cb(null, uuid() + path.extname(file.originalname));
     }
-})
-app.use(multer({ storage }).single('image'));
+});
+
+// app.use(multer({ storage }).array('image'));
 
 cloudinary.config({
     cloud_name: 'dxc1pkofx',

@@ -32,51 +32,90 @@ async function addProject(req, res) {
     project.description = description;
     project.createdAt = createdAt;
 
+    if (req.files) {
+        let arrayImages = [];
+        let cont = 0;
+        req.files.forEach(async(item, index) => {
+            const imgCloudinary = await cloudinary.v2.uploader.upload(item.path, {
+                    eager: [
+                        { width: 360, height: 240, crop: "pad" },
+                    ]
 
-    const imgCloudinary = await cloudinary.v2.uploader.upload(req.file.path, {
-            eager: [
-                { width: 400, height: 300, crop: "pad" },
-                { width: 260, height: 200, crop: "crop", gravity: "north" }
-            ]
-        },
-        function(error, result) {});
-    project.imgUrl = imgCloudinary.eager[0].url;
+                },
+                function(error, result) {});
 
-    project.save((err, projectSaved) => {
-        if (err) {
-            return res.status(500).send({
-                ok: false,
-                message: "Error del servidor al crear proyecto.",
-            });
-        }
+            arrayImages.push(imgCloudinary.eager[0].url);
+            cont++;
+            if (req.files.length === cont) {
+                project.imgUrl = arrayImages;
+                project.save((err, projectSaved) => {
+                    if (err) {
+                        return res.status(500).send({
+                            ok: false,
+                            message: "Error del servidor al crear proyecto.",
+                        });
+                    }
 
-        if (!projectSaved) {
-            return res.status(400).send({
-                ok: false,
-                message: "No se ha podido crear el proyecto.",
-            });
-        }
+                    if (!projectSaved) {
+                        return res.status(400).send({
+                            ok: false,
+                            message: "No se ha podido crear el proyecto.",
+                        });
+                    }
 
-        return res.status(200).send({
-            ok: true,
-            message: "Se ha creado el proyecto correctamente.",
-            project: projectSaved,
+                    return res.status(200).send({
+                        ok: true,
+                        message: "Se ha creado el proyecto correctamente.",
+                        project: projectSaved,
+                    });
+                });
+            }
         });
-    });
+    }
+
+
 };
 
 async function editProject(req, res) {
-    if (req.file) {
-        const imgCloudinary = await cloudinary.v2.uploader.upload(req.file.path, {
-                eager: [
-                    { width: 400, height: 300, crop: "pad" },
-                    { width: 260, height: 200, crop: "crop", gravity: "north" }
-                ]
-            },
-            function(error, result) {});
-        req.body.imgUrl = imgCloudinary.eager[0].url;
-    }
+    if (req.files) {
+        let cont = 0;
+        let arrayImages = [];
+        req.files.forEach(async(item, index) => {
+            const imgCloudinary = await cloudinary.v2.uploader.upload(item.path, {
+                    eager: [
+                        { width: 360, height: 240, crop: "pad" },
+                    ]
+                },
+                function(error, result) {});
+            arrayImages.push(imgCloudinary.eager[0].url);
+            cont++;
+            if (req.files.length === cont) {
+                req.body.imgUrl = arrayImages;
+                Project.findByIdAndUpdate({ _id: req.body.id }, req.body, (err, projectUpdated) => {
+                    if (err) {
+                        return res.status(500).send({
+                            ok: false,
+                            message: "Error del servidor al editar proyecto.",
+                        });
+                    }
 
+                    if (!projectUpdated) {
+                        return res.status(400).send({
+                            ok: false,
+                            message: "No se ha podido editar el proyecto.",
+                        });
+                    }
+
+                    return res.status(200).send({
+                        ok: true,
+                        message: "Se ha editado el proyecto correctamente.",
+                        project: projectUpdated,
+                    });
+                });
+            }
+        });
+
+    }
 
     Project.findByIdAndUpdate({ _id: req.body.id }, req.body, (err, projectUpdated) => {
         if (err) {
@@ -99,7 +138,46 @@ async function editProject(req, res) {
             project: projectUpdated,
         });
     });
+
+
+
 }
+
+// async function editProject(req, res) {
+//     if (req.file) {
+//         const imgCloudinary = await cloudinary.v2.uploader.upload(req.file.path, {
+//                 eager: [
+//                     { width: 400, height: 300, crop: "pad" },
+//                     { width: 260, height: 200, crop: "crop", gravity: "north" }
+//                 ]
+//             },
+//             function(error, result) {});
+//         req.body.imgUrl = imgCloudinary.eager[0].url;
+//     }
+
+
+//     Project.findByIdAndUpdate({ _id: req.body.id }, req.body, (err, projectUpdated) => {
+//         if (err) {
+//             return res.status(500).send({
+//                 ok: false,
+//                 message: "Error del servidor al editar proyecto.",
+//             });
+//         }
+
+//         if (!projectUpdated) {
+//             return res.status(400).send({
+//                 ok: false,
+//                 message: "No se ha podido editar el proyecto.",
+//             });
+//         }
+
+//         return res.status(200).send({
+//             ok: true,
+//             message: "Se ha editado el proyecto correctamente.",
+//             project: projectUpdated,
+//         });
+//     });
+// }
 
 async function deleteProject(req, res) {
     const id = req.body.idProject;
