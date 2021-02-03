@@ -34,6 +34,7 @@ async function addProject(req, res) {
 
     if (req.files) {
         let arrayImages = [];
+        let arrayImagesNormales = [];
         let cont = 0;
         req.files.forEach(async(item, index) => {
             const imgCloudinary = await cloudinary.v2.uploader.upload(item.path, {
@@ -43,8 +44,10 @@ async function addProject(req, res) {
 
                 },
                 function(error, result) {});
-
-            arrayImages.push(imgCloudinary.eager[0].url);
+            arrayImagesNormales.push(imgCloudinary.url);
+            arrayImagesNormales.push(imgCloudinary.eager[0].url);
+            arrayImages.push(arrayImagesNormales);
+            arrayImagesNormales = [];
             cont++;
             if (req.files.length === cont) {
                 project.imgUrl = arrayImages;
@@ -77,6 +80,7 @@ async function addProject(req, res) {
 };
 
 async function editProject(req, res) {
+    let arrayImagesNormales = [];
     if (req.files) {
         let cont = 0;
         let arrayImages = [];
@@ -87,7 +91,10 @@ async function editProject(req, res) {
                     ]
                 },
                 function(error, result) {});
-            arrayImages.push(imgCloudinary.eager[0].url);
+            arrayImagesNormales.push(imgCloudinary.url);
+            arrayImagesNormales.push(imgCloudinary.eager[0].url);
+            arrayImages.push(arrayImagesNormales);
+            arrayImagesNormales = [];
             cont++;
             if (req.files.length === cont) {
                 req.body.imgUrl = arrayImages;
@@ -115,29 +122,31 @@ async function editProject(req, res) {
             }
         });
 
+    } else {
+        Project.findByIdAndUpdate({ _id: req.body.id }, req.body, (err, projectUpdated) => {
+            if (err) {
+                return res.status(500).send({
+                    ok: false,
+                    message: "Error del servidor al editar proyecto.",
+                });
+            }
+
+            if (!projectUpdated) {
+                return res.status(400).send({
+                    ok: false,
+                    message: "No se ha podido editar el proyecto.",
+                });
+            }
+
+            return res.status(200).send({
+                ok: true,
+                message: "Se ha editado el proyecto correctamente.",
+                project: projectUpdated,
+            });
+        });
     }
 
-    Project.findByIdAndUpdate({ _id: req.body.id }, req.body, (err, projectUpdated) => {
-        if (err) {
-            return res.status(500).send({
-                ok: false,
-                message: "Error del servidor al editar proyecto.",
-            });
-        }
 
-        if (!projectUpdated) {
-            return res.status(400).send({
-                ok: false,
-                message: "No se ha podido editar el proyecto.",
-            });
-        }
-
-        return res.status(200).send({
-            ok: true,
-            message: "Se ha editado el proyecto correctamente.",
-            project: projectUpdated,
-        });
-    });
 
 
 
