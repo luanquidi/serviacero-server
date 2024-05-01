@@ -20,7 +20,7 @@ const {
 
 
 // =================================================== MONGO ==========================================================
-const urlDatabaseProd = `mongodb+srv://${USER_DB}:${PASSWORD_DB}@cluster0-2dg8m.mongodb.net/serviacero?retryWrites=true&w=majority`;
+const urlDatabaseProd = `mongodb://mongo:1FaGf3Ef2c2chH36HFEbFfbhg3fHbGGB@monorail.proxy.rlwy.net:37653/indumet?authSource=admin`;
 mongoose.set("useFindAndModify", false);
 
 mongoose.connect(

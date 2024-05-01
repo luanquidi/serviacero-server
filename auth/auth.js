@@ -51,6 +51,35 @@ async function login(req, res) {
 };
 
 
+const registroAdmin = async (req, res) => {
+    // Se procesa la data.
+    const data = req.body;
+    let listadoAdmins = [];
+
+    listadoAdmins = await User.find({ email: data.email });
+
+    if (listadoAdmins.length === 0) {
+        if (data.password) {
+            bcrypt.hash(data.password, null, null, async function (err, hash) {
+                if (hash) {
+                    // Se registra el cliente
+                    data.password = hash;
+                    const reg = await User.create(data);
+                    res.status(200).send({
+                        datos: true,
+                        resultadoExitoso: true,
+                        mensaje: 'Operación existosa!'
+                    });
+                } else res.status(200).send({ datos: null, resultadoExitoso: false, mensaje: 'Error server.' })
+            });
+        } else res.status(200).send({ datos: null, resultadoExitoso: false, mensaje: 'No hay una contraseña.' })
+
+
+    } else res.status(200).send({ datos: null, resultadoExitoso: false, mensaje: 'El correo ya existe en la base de datos.' })
+}
+
+
 module.exports = {
-    login
+    login,
+    registroAdmin
 }
